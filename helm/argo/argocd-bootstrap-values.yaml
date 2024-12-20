@@ -1,0 +1,9 @@
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+configs:
+  cm:
+    create: true
+  repositories:
+      paas:
+        url:  https://github.com/Jgeissler14/aks_paas.git

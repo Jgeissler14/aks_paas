@@ -31,3 +31,13 @@ resource "helm_release" "argocd" {
     file("./argo/argocd-bootstrap-values.yaml"),
   ]
 }
+
+# cert manager
+resource "helm_release" "cert_manager" {
+  name       = "cert-manager"
+  namespace  = "cert-manager"
+  repository = "https://charts.jetstack.io"
+  chart      = "cert-manager"
+  version    = "v1.16.2"
+  skip_crds  = true
+}
