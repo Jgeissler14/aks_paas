@@ -1,3 +1,15 @@
+# ArgoCD
+
+## Get admin secret
+kubectl -n argocd get secret argocd-initial-admin-secret \
+          -o jsonpath="{.data.password}" | base64 -d; echo
+
+## Port Forward
+kubectl port-forward -n argocd svc/argocd-server 8080:80
+
+kubectl config set-context --current --namespace=argocd
+argocd app create argo-apps --repo https://github.com/jgeissler14/aks_paas.git --path argo --dest-namespace argocd --dest-server https://kubernetes.default.svc
+
 # AKS (Azure Kubernetes Service)
 
 This example shows how to use the Terraform Kubernetes Provider and Terraform Helm Provider to configure an AKS cluster. The example config in this directory builds the AKS cluster and applies the Kubernetes configurations in a single operation. This guide will also show you how to make changes to the underlying AKS cluster in such a way that Kuberntes/Helm resources are recreated after the underlying cluster is replaced.

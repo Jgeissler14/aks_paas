@@ -4,16 +4,13 @@
 terraform {
   required_providers {
     kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = ">= 2.0.3"
+      source = "hashicorp/kubernetes"
     }
     azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "2.42"
+      source = "hashicorp/azurerm"
     }
     helm = {
-      source  = "hashicorp/helm"
-      version = ">= 2.1.0"
+      source = "hashicorp/helm"
     }
   }
 }
@@ -29,6 +26,7 @@ provider "kubernetes" {
   client_certificate     = base64decode(data.azurerm_kubernetes_cluster.default.kube_config.0.client_certificate)
   client_key             = base64decode(data.azurerm_kubernetes_cluster.default.kube_config.0.client_key)
   cluster_ca_certificate = base64decode(data.azurerm_kubernetes_cluster.default.kube_config.0.cluster_ca_certificate)
+  config_path = "./kubeconfig"
 }
 
 provider "helm" {
@@ -37,11 +35,14 @@ provider "helm" {
     client_certificate     = base64decode(data.azurerm_kubernetes_cluster.default.kube_config.0.client_certificate)
     client_key             = base64decode(data.azurerm_kubernetes_cluster.default.kube_config.0.client_key)
     cluster_ca_certificate = base64decode(data.azurerm_kubernetes_cluster.default.kube_config.0.cluster_ca_certificate)
+    config_path = "./kubeconfig"
   }
 }
 
 provider "azurerm" {
   features {}
+  tenant_id       = var.tenant_id
+  subscription_id = var.subscription_id
 }
 
 module "aks-cluster" {
