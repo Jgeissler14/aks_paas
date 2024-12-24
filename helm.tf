@@ -28,16 +28,28 @@ resource "helm_release" "argocd" {
   skip_crds  = true
 
   values = [
-    file("./argo/argocd-bootstrap-values.yaml"),
+    file("./helm/argo/argocd-bootstrap-values.yaml"),
   ]
 }
 
-# cert manager
-resource "helm_release" "cert_manager" {
-  name       = "cert-manager"
-  namespace  = "cert-manager"
-  repository = "https://charts.jetstack.io"
-  chart      = "cert-manager"
-  version    = "v1.16.2"
-  skip_crds  = true
-}
+# resource "kubernetes_namespace" "cert-manager" {
+#   depends_on = [data.azurerm_kubernetes_cluster.default]
+
+#   metadata {
+#     name = "cert-manager"
+#   }
+# }
+
+# Cert Manager
+# resource "helm_release" "cert_manager" {
+#   name       = "cert-manager"
+#   namespace  = "cert-manager"
+#   repository = "https://charts.jetstack.io"
+#   chart      = "cert-manager"
+#   version    = "v1.16.2"
+#   skip_crds  = true
+
+#   # values = [
+#   #   file("./helm/cert-manager/cert-manager-values.yaml"),
+#   # ]
+# }

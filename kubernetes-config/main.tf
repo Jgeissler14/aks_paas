@@ -18,9 +18,6 @@ resource "local_file" "kubeconfig" {
   content  = var.kubeconfig
   filename = "${path.root}/kubeconfig"
 
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 
