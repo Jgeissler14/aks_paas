@@ -1,5 +1,7 @@
 # ArgoCD
 
+k apply -f helm/argo/app_of_apps.yaml
+
 ## Get admin secret
 kubectl -n argocd get secret argocd-initial-admin-secret \
           -o jsonpath="{.data.password}" | base64 -d; echo
