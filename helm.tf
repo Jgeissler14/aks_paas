@@ -32,13 +32,6 @@ resource "helm_release" "argocd" {
   ]
 }
 
-resource "helm_release" "app_of_apps" {
-  name       = "app-of-apps"
-  namespace  = "argocd"
-  repository = "https://github.com/jgeissler14/aks_paas/helm/argo/workloads/templates"
-  chart      = "workloads"
-}
-
 # resource "kubernetes_namespace" "cert-manager" {
 #   depends_on = [data.azurerm_kubernetes_cluster.default]
 
