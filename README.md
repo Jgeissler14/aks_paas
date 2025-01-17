@@ -1,74 +1,51 @@
-# ArgoCD
+# DevOps Project: Python API to AWS Kubernetes
+This project walks you through building a Python API, containerizing it with Docker, and automating the CI/CD pipeline with GitHub Actions. You'll then provision infrastructure using Terraform on AWS, deploy the API on an EKS (Elastic Kubernetes Service) cluster. This complete DevOps pipeline demonstrates key skills needed to land a job in DevOps and is a great addition to your portfolio.
 
-k apply -f helm/argo/app_of_apps.yaml
+You should not copy this, but model after it and customize to fit your interests.
 
-## Get admin secret
-kubectl -n argocd get secret argocd-initial-admin-secret \
-          -o jsonpath="{.data.password}" | base64 -d; echo
+![Architecture](architecture.png)
+
+## Python
+```
+python3 -m venv venv
+source venv/bin/activate
+python3 -m pip install -r requirements.txt
+cd app
+uvicorn main:app --host 0.0.0.0 --port 8080
+```
+
+## Docker
+```
+docker run -d --name devops-python -p 8080:80 devops-python
+docker build -t devops-python .
+```
+
+Replace your github username in the github action variable [here](./.github/workflows/release.yaml)
+
+
+<span style="color:red">Note: By default your action can't deploy to ghcr. Go to settings > actions > general > workflow permissions > Read and write permissions</span>
+
+# Terraform and Kubernetes
+<span style="color:red">Need to set your own variables for Azure Access in terraform/variables.tf</span>
+
+Reference Guide: https://github.com/hashicorp/terraform-provider-kubernetes/blob/main/_examples/aks/main.tf
+
+Deploy
+
+```
+az login
+tf init
+tf apply
+```
+
+Check Pods
+
+```
+export KUBECONFIG="./kubeconfig"
+kubectl get pods -A+
 
 ## Port Forward
-kubectl port-forward -n argocd svc/argocd-server 8080:80
-
-kubectl config set-context --current --namespace=argocd
-argocd app create argo-apps --repo https://github.com/jgeissler14/aks_paas.git --path argo --dest-namespace argocd --dest-server https://kubernetes.default.svc
-
-# AKS (Azure Kubernetes Service)
-
-This example shows how to use the Terraform Kubernetes Provider and Terraform Helm Provider to configure an AKS cluster. The example config in this directory builds the AKS cluster and applies the Kubernetes configurations in a single operation. This guide will also show you how to make changes to the underlying AKS cluster in such a way that Kuberntes/Helm resources are recreated after the underlying cluster is replaced.
-
-You will need the following environment variables to be set:
-
-  - `ARM_SUBSCRIPTION_ID`
-  - `ARM_TENANT_ID`
-  - `ARM_CLIENT_ID`
-  - `ARM_CLIENT_SECRET`
-
-Ensure that `KUBE_CONFIG_FILE` and `KUBE_CONFIG_FILES` environment variables are NOT set, as they will interfere with the cluster build.
-
 ```
-unset KUBE_CONFIG_FILE
-unset KUBE_CONFIG_FILES
+kubectl port-forward -n api svc/api-service 8080:80
 ```
 
-To install the AKS cluster using default values, run terraform init and apply from the directory containing this README.
-
-```
-terraform init
-terraform apply
-```
-
-## Kubeconfig for manual CLI access
-
-This example generates a kubeconfig file in the current working directory, which can be used for manual CLI access to the cluster.
-
-```
-export KUBECONFIG=$(terraform output -raw kubeconfig_path)
-kubectl get pods -n test
-```
-
-However, in a real-world scenario, this config file would have to be replaced periodically as the AKS client certificates eventually expire (see the [Azure documentation](https://docs.microsoft.com/en-us/azure/aks/certificate-rotation) for the exact expiry dates). If the certificates (or other authentication attributes) are replaced, run a targeted `terraform apply` to save the new credentials into state.
-
-```
-terraform plan -target=module.aks-cluster
-terraform apply -target=module.aks-cluster
-```
-
-Once the targeted apply is finished, the Kubernetes and Helm providers will be available for use again. Run `terraform apply` again (without targeting) to apply any updates to Kubernetes resources.
-
-```
-terraform plan
-terraform apply
-```
-
-This approach prevents the Kubernetes and Helm providers from attempting to use cached, invalid credentials, which would cause provider configuration errors durring the plan and apply phases.
-
-## Replacing the AKS cluster and re-creating the Kubernetes / Helm resources
-
-When the cluster is initially created, the Kubernetes and Helm providers will not be initialized until authentication details are created for the cluster. However, for future operations that may involve replacing the underlying cluster (for example, changing VM sizes), the AKS cluster will have to be targeted without the Kubernetes/Helm providers, as shown below. This is done by removing the `module.kubernetes-config` from Terraform State prior to replacing cluster credentials, to avoid passing outdated credentials into the providers.
-
-This will create the new cluster and the Kubernetes resources in a single apply.
-
-```
-terraform state rm module.kubernetes-config
-terraform apply
-```
